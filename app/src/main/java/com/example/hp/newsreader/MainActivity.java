@@ -8,6 +8,9 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -61,7 +64,39 @@ public class MainActivity extends AppCompatActivity {
                     data=inputStreamReader.read();
                 }
 
-                Log.i("Data",result);
+                JSONArray jsonArray=new JSONArray(result);
+                int numberOfNews=10;
+                if(jsonArray.length()<10){
+                    numberOfNews=jsonArray.length();
+                }
+                for(int i=0;i<numberOfNews;i++){
+                    String articleId=jsonArray.getString(i);
+                   try{
+                        url=new URL("https://hacker-news.firebaseio.com/v0/item/"+articleId+".json?print=pretty");
+                        urlConnection=(HttpURLConnection)url.openConnection();
+                        inputStream=urlConnection.getInputStream();
+                        inputStreamReader=new InputStreamReader(inputStream);
+                        data=inputStreamReader.read();
+                        String article="";
+                        while(data!=-1){
+                            char current = (char)data;
+                            article+=current;
+                            data=inputStreamReader.read();
+                        }
+
+                        JSONObject jsonObject=new JSONObject(article);
+                        String articleTitle=jsonObject.getString("title");
+                        String articleURL= jsonObject.getString("url");
+
+                        Log.i("Title and URL",articleTitle+"#######"+articleURL);
+
+                       // Log.i("ARTICLE",article);
+
+                    }catch (Exception e){
+                        e.printStackTrace();
+                   }
+                }
+               Log.i("Data",result);
                 return result;
 
             }catch (Exception e){
